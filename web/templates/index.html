@@ -3,238 +3,435 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>文案提取器 - Transcript Extractor</title>
+    <title>文案提取器 - AI Powered Transcript Extractor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
-                        'sans': ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        'sans': ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
                     },
                     colors: {
-                        'douyin': {
-                            'red': '#FE2C55',
-                            'pink': '#FF6B9D',
-                            'coral': '#FF4F6D',
-                            'dark': '#161823',
-                            'gray': {
-                                50: '#F8F8F8',
-                                100: '#F1F1F2',
-                                200: '#E5E5E6',
-                                300: '#C9C9CA',
-                                400: '#9E9E9F',
-                                500: '#6C6C6D',
-                                600: '#4A4A4B',
-                                700: '#2F2F30',
-                                800: '#1F1F20',
-                                900: '#121213',
-                            }
-                        }
+                        brand: {
+                            50: '#FEF2F4',
+                            100: '#FEE2E6',
+                            200: '#FECAD3',
+                            300: '#FDA8AF',
+                            400: '#FB7185',
+                            500: '#F43F5E',
+                            600: '#E11D48',
+                            700: '#BE123C',
+                            800: '#9F1239',
+                            900: '#881337',
+                        },
+                        accent: {
+                            50: '#EFF6FF',
+                            100: '#DBEAFE',
+                            200: '#BFDBFE',
+                            300: '#93C5FD',
+                            400: '#60A5FA',
+                            500: '#3B82F6',
+                            600: '#2563EB',
+                            700: '#1D4ED8',
+                            800: '#1E40AF',
+                            900: '#1E3A8A',
+                        },
                     },
-                    boxShadow: {
-                        'card': '0 2px 8px rgba(0, 0, 0, 0.04), 0 4px 24px rgba(0, 0, 0, 0.06)',
-                        'card-hover': '0 4px 12px rgba(0, 0, 0, 0.06), 0 8px 32px rgba(0, 0, 0, 0.08)',
-                        'input': '0 0 0 4px rgba(254, 44, 85, 0.1)',
-                    }
-                }
-            }
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'shimmer': 'shimmer 2s linear infinite',
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'slide-up': 'slideUp 0.4s ease-out',
+                        'scale-in': 'scaleIn 0.2s ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        shimmer: {
+                            '0%': { backgroundPosition: '-1000px 0' },
+                            '100%': { backgroundPosition: '1000px 0' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        scaleIn: {
+                            '0%': { opacity: '0', transform: 'scale(0.95)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' },
+                        },
+                    },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                        'gradient-mesh': 'conic-gradient(from 0deg at 50% 50%, #F43F5E 0deg, #3B82F6 90deg, #8B5CF6 180deg, #F43F5E 270deg, #F43F5E 360deg)',
+                    },
+                },
+            },
         }
     </script>
     <style>
-        * { box-sizing: border-box; }
-
-        body {
-            font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+        /* Base Styles */
+        * {
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Custom scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
-
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
-
-        @keyframes pulse-soft {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-        .animate-pulse-soft { animation: pulse-soft 2s ease-in-out infinite; }
-
-        @keyframes spin-slow {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        .animate-spin-slow { animation: spin-slow 1.5s linear infinite; }
-
-        /* Gradient backgrounds */
-        .bg-gradient-douyin {
-            background: linear-gradient(135deg, #FE2C55 0%, #FF6B9D 100%);
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
-        .bg-gradient-mesh {
-            background:
-                radial-gradient(at 40% 20%, rgba(254, 44, 85, 0.08) 0px, transparent 50%),
-                radial-gradient(at 80% 0%, rgba(255, 107, 157, 0.06) 0px, transparent 50%),
-                radial-gradient(at 0% 50%, rgba(254, 44, 85, 0.04) 0px, transparent 50%);
+        /* Glassmorphism Effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        /* Focus states */
+        .glass-dark {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        }
+
+        .glass-card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        /* Animated Background */
+        .animated-bg {
+            background: linear-gradient(-45deg, #EEF2FF, #FEF2F4, #F0F9FF, #FAF5FF);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Floating Orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, #F43F5E 0%, #FB7185 100%);
+            top: -100px;
+            right: -100px;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
+            bottom: -50px;
+            left: -50px;
+            animation: float 10s ease-in-out infinite 2s;
+        }
+
+        .orb-3 {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%);
+            top: 50%;
+            left: 50%;
+            animation: float 12s ease-in-out infinite 4s;
+        }
+
+        /* Gradient Button */
+        .btn-gradient {
+            background: linear-gradient(135deg, #F43F5E 0%, #E11D48 50%, #BE123C 100%);
+            background-size: 200% 200%;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-gradient:hover::before {
+            left: 100%;
+        }
+
+        .btn-gradient:hover {
+            background-position: right center;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(244, 63, 94, 0.4);
+        }
+
+        .btn-gradient:active {
+            transform: translateY(0);
+        }
+
+        /* Focus Ring */
         .focus-ring:focus {
             outline: none;
-            box-shadow: 0 0 0 4px rgba(254, 44, 85, 0.15);
+            ring: 2px;
+            ring-color: #3B82F6;
+            ring-offset: 2px;
         }
 
-        /* Transitions */
-        .transition-smooth {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        /* Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
         }
 
-        /* Text ellipsis */
-        .line-clamp-2 {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #F43F5E 0%, #3B82F6 100%);
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #E11D48 0%, #2563EB 100%);
+        }
+
+        /* Shimmer Loading Effect */
+        .shimmer {
+            background: linear-gradient(90deg, #F0F0F0 25%, #E8E8E8 50%, #F0F0F0 75%);
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite;
+        }
+
+        /* Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Text Gradient */
+        .text-gradient {
+            background: linear-gradient(135deg, #F43F5E 0%, #3B82F6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Status Indicator Pulse */
+        .status-pulse {
+            position: relative;
+        }
+
+        .status-pulse::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            animation: pulse-ring 2s ease-out infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        /* Input Focus Effect */
+        .input-focus-effect {
+            transition: all 0.3s ease;
+        }
+
+        .input-focus-effect:focus {
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
     </style>
 </head>
-<body class="bg-douyin-gray-50 min-h-screen bg-gradient-mesh" x-data="douyinExtractor()" x-init="checkHealth()">
+<body class="animated-bg min-h-screen relative overflow-x-hidden" x-data="douyinExtractor()" x-init="checkHealth()">
+
+    <!-- Floating Orbs Background -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
 
     <!-- Top Navigation Bar -->
-    <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-douyin-gray-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <!-- Logo -->
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 bg-gradient-douyin rounded-xl flex items-center justify-center shadow-lg shadow-douyin-red/20">
-                        <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/>
-                        </svg>
+    <nav class="sticky top-4 z-50 mx-4 sm:mx-6 lg:mx-8">
+        <div class="glass rounded-2xl shadow-lg">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <!-- Logo -->
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/30">
+                            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-lg font-bold text-slate-800">文案提取器</h1>
+                            <p class="text-xs text-slate-500 -mt-0.5 font-medium">AI Transcript Extractor</p>
+                        </div>
                     </div>
-                    <div>
-                        <h1 class="text-lg font-semibold text-douyin-gray-900">文案提取器</h1>
-                        <p class="text-xs text-douyin-gray-400 -mt-0.5">Transcript Extractor</p>
+
+                    <!-- API Status Badge -->
+                    <div class="flex items-center gap-3">
+                        <button @click="showSettings = true"
+                                class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium cursor-pointer transition-all duration-200 hover:scale-105"
+                                :class="apiKeyConfigured ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'">
+                            <span class="relative flex h-2.5 w-2.5">
+                                <span class="absolute inline-flex h-full w-full rounded-full opacity-75 status-pulse"
+                                      :class="apiKeyConfigured ? 'bg-emerald-500' : 'bg-amber-500'"></span>
+                                <span class="relative inline-flex rounded-full h-2.5 w-2.5"
+                                      :class="apiKeyConfigured ? 'bg-emerald-500' : 'bg-amber-500'"></span>
+                            </span>
+                            <span x-text="apiKeyConfigured ? 'API 已连接' : '点击配置 API'"></span>
+                        </button>
+
+                        <!-- Help Button -->
+                        <button @click="showHelp = !showHelp"
+                                class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-all duration-200 hover:scale-105">
+                            <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </button>
                     </div>
-                </div>
-
-                <!-- API Status Badge -->
-                <div class="flex items-center gap-4">
-                    <button @click="showSettings = true"
-                            class="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm cursor-pointer hover:opacity-80 transition-smooth"
-                            :class="apiKeyConfigured ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'">
-                        <span class="relative flex h-2 w-2">
-                            <span class="absolute inline-flex h-full w-full rounded-full opacity-75"
-                                  :class="apiKeyConfigured ? 'bg-green-400 animate-ping' : 'bg-amber-400'"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2"
-                                  :class="apiKeyConfigured ? 'bg-green-500' : 'bg-amber-500'"></span>
-                        </span>
-                        <span x-text="apiKeyConfigured ? 'API 已连接' : '点击配置 API'"></span>
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                    </button>
-
-                    <!-- Help Button -->
-                    <button @click="showHelp = !showHelp"
-                            class="w-9 h-9 rounded-full bg-douyin-gray-100 hover:bg-douyin-gray-200 flex items-center justify-center transition-smooth">
-                        <svg class="w-5 h-5 text-douyin-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </button>
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Settings Modal (API Key Configuration) -->
-    <div x-show="showSettings" x-transition.opacity class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
-         @click.self="showSettings = false">
-        <div x-show="showSettings" x-transition:enter="transition ease-out duration-200"
+    <div x-show="showSettings" x-transition.opacity class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4"
+         @click.self="showSettings = false"
+         style="display: none;">
+        <div x-show="showSettings" x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-             class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-fadeIn">
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+             class="glass-card rounded-3xl shadow-2xl max-w-md w-full p-8">
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-douyin rounded-xl flex items-center justify-center">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-12 h-12 bg-gradient-to-br from-brand-500 to-brand-600 rounded-2xl flex items-center justify-center shadow-lg shadow-brand-500/30">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold text-douyin-gray-900">API 配置</h3>
-                        <p class="text-xs text-douyin-gray-400">配置硅基流动 API Key</p>
+                        <h3 class="text-xl font-bold text-slate-800">API 配置</h3>
+                        <p class="text-sm text-slate-500">配置硅基流动 API Key</p>
                     </div>
                 </div>
-                <button @click="showSettings = false" class="w-8 h-8 rounded-full hover:bg-douyin-gray-100 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-douyin-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button @click="showSettings = false" class="w-10 h-10 rounded-xl hover:bg-slate-100 flex items-center justify-center transition-all duration-200 hover:scale-105">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
             </div>
 
             <!-- API Key Input -->
-            <div class="space-y-4">
+            <div class="space-y-5">
                 <div>
-                    <label class="block text-sm font-medium text-douyin-gray-700 mb-2">API Key</label>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">API Key</label>
                     <div class="relative">
                         <input
                             :type="showApiKey ? 'text' : 'password'"
                             x-model="apiKeyInput"
                             placeholder="sk-xxxxxxxxxxxxxxxx"
-                            class="w-full px-4 py-3 pr-20 text-sm border border-douyin-gray-200 rounded-xl focus-ring transition-smooth font-mono"
+                            class="w-full px-5 py-4 pr-24 text-sm border-2 border-slate-200 rounded-2xl input-focus-effect font-mono bg-white/50"
                         >
                         <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                             <button @click="showApiKey = !showApiKey"
-                                    class="w-8 h-8 rounded-lg hover:bg-douyin-gray-100 flex items-center justify-center transition-smooth">
-                                <svg x-show="!showApiKey" class="w-4 h-4 text-douyin-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    class="w-9 h-9 rounded-xl hover:bg-slate-100 flex items-center justify-center transition-all duration-200">
+                                <svg x-show="!showApiKey" class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                 </svg>
-                                <svg x-show="showApiKey" class="w-4 h-4 text-douyin-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg x-show="showApiKey" class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
                                 </svg>
                             </button>
                             <button x-show="apiKeyInput"
                                     @click="apiKeyInput = ''"
-                                    class="w-8 h-8 rounded-lg hover:bg-douyin-gray-100 flex items-center justify-center transition-smooth">
-                                <svg class="w-4 h-4 text-douyin-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    class="w-9 h-9 rounded-xl hover:bg-slate-100 flex items-center justify-center transition-all duration-200">
+                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
                             </button>
                         </div>
                     </div>
-                    <p class="mt-2 text-xs text-douyin-gray-400">API Key 仅保存在浏览器本地，不会上传到服务器</p>
+                    <p class="mt-2 text-xs text-slate-500 flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                        API Key 仅保存在浏览器本地
+                    </p>
                 </div>
 
                 <!-- Status Indicator -->
-                <div class="p-4 rounded-xl" :class="apiKeyInput ? 'bg-green-50 border border-green-100' : 'bg-douyin-gray-50'">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg flex items-center justify-center"
-                             :class="apiKeyInput ? 'bg-green-100' : 'bg-douyin-gray-200'">
-                            <svg x-show="apiKeyInput" class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                <div class="p-5 rounded-2xl transition-all duration-200" :class="apiKeyInput ? 'bg-emerald-50 border-2 border-emerald-200' : 'bg-slate-50 border-2 border-slate-100'">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-200"
+                             :class="apiKeyInput ? 'bg-emerald-100' : 'bg-slate-200'">
+                            <svg x-show="apiKeyInput" class="w-7 h-7 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                             </svg>
-                            <svg x-show="!apiKeyInput" class="w-5 h-5 text-douyin-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg x-show="!apiKeyInput" class="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm font-medium" :class="apiKeyInput ? 'text-green-700' : 'text-douyin-gray-600'"
+                            <p class="text-sm font-semibold" :class="apiKeyInput ? 'text-emerald-700' : 'text-slate-600'"
                                x-text="apiKeyInput ? 'API Key 已配置' : '未配置 API Key'"></p>
-                            <p class="text-xs" :class="apiKeyInput ? 'text-green-600' : 'text-douyin-gray-400'"
+                            <p class="text-xs" :class="apiKeyInput ? 'text-emerald-600' : 'text-slate-400'"
                                x-text="apiKeyInput ? '可以使用文案提取功能' : '仅可获取视频信息'"></p>
                         </div>
                     </div>
@@ -243,14 +440,14 @@
                 <!-- Actions -->
                 <div class="flex gap-3">
                     <a href="https://cloud.siliconflow.cn/i/TxUlXG3u" target="_blank"
-                       class="flex-1 h-11 border border-douyin-gray-200 hover:bg-douyin-gray-50 text-douyin-gray-700 font-medium text-sm rounded-xl transition-smooth flex items-center justify-center gap-2">
+                       class="flex-1 h-12 border-2 border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-2xl transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                         </svg>
                         获取 API Key
                     </a>
                     <button @click="saveApiKey"
-                            class="flex-1 h-11 bg-gradient-douyin hover:opacity-90 text-white font-medium text-sm rounded-xl transition-smooth flex items-center justify-center gap-2 shadow-lg shadow-douyin-red/20">
+                            class="flex-1 h-12 btn-gradient text-white font-semibold text-sm rounded-2xl flex items-center justify-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
@@ -261,7 +458,7 @@
                 <!-- Clear Button -->
                 <button x-show="apiKey"
                         @click="clearApiKey"
-                        class="w-full h-10 text-sm text-red-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-smooth flex items-center justify-center gap-2">
+                        class="w-full h-11 text-sm text-red-500 hover:text-red-600 hover:bg-red-50 rounded-2xl transition-all duration-200 flex items-center justify-center gap-2 font-medium">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                     </svg>
@@ -272,71 +469,84 @@
     </div>
 
     <!-- Help Modal -->
-    <div x-show="showHelp" x-transition.opacity class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
-         @click.self="showHelp = false">
-        <div x-show="showHelp" x-transition:enter="transition ease-out duration-200"
+    <div x-show="showHelp" x-transition.opacity class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4"
+         @click.self="showHelp = false"
+         style="display: none;">
+        <div x-show="showHelp" x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
-             class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-fadeIn">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-douyin-gray-900">使用说明</h3>
-                <button @click="showHelp = false" class="w-8 h-8 rounded-full hover:bg-douyin-gray-100 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-douyin-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+             class="glass-card rounded-3xl shadow-2xl max-w-md w-full p-8">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-bold text-slate-800">使用说明</h3>
+                <button @click="showHelp = false" class="w-10 h-10 rounded-xl hover:bg-slate-100 flex items-center justify-center transition-all duration-200 hover:scale-105">
+                    <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
             </div>
-            <div class="space-y-4 text-sm text-douyin-gray-600">
-                <div class="p-4 bg-douyin-gray-50 rounded-xl">
-                    <p class="font-medium text-douyin-gray-900 mb-2">1. 配置 API Key</p>
+            <div class="space-y-4 text-sm text-slate-600">
+                <div class="p-5 bg-gradient-to-r from-brand-50 to-brand-100/50 rounded-2xl border border-brand-100">
+                    <p class="font-bold text-brand-700 mb-2">1. 配置 API Key</p>
                     <p>点击顶部状态栏，在弹窗中输入 API Key</p>
                 </div>
-                <div class="p-4 bg-douyin-gray-50 rounded-xl">
-                    <p class="font-medium text-douyin-gray-900 mb-2">2. 粘贴分享链接</p>
+                <div class="p-5 bg-gradient-to-r from-accent-50 to-accent-100/50 rounded-2xl border border-accent-100">
+                    <p class="font-bold text-accent-700 mb-2">2. 粘贴分享链接</p>
                     <p>支持各种短视频平台的分享链接</p>
                 </div>
-                <div class="p-4 bg-douyin-gray-50 rounded-xl">
-                    <p class="font-medium text-douyin-gray-900 mb-2">3. 点击提取</p>
+                <div class="p-5 bg-gradient-to-r from-violet-50 to-violet-100/50 rounded-2xl border border-violet-100">
+                    <p class="font-bold text-violet-700 mb-2">3. 点击提取</p>
                     <p>「获取信息」无需 API，「提取文案」需要 API</p>
                 </div>
             </div>
             <a href="https://cloud.siliconflow.cn/i/TxUlXG3u" target="_blank"
-               class="mt-4 block w-full text-center py-2.5 bg-gradient-douyin text-white rounded-xl font-medium hover:opacity-90 transition-smooth">
+               class="mt-6 block w-full text-center py-3.5 btn-gradient text-white rounded-2xl font-bold">
                 获取免费 API Key
             </a>
         </div>
     </div>
 
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-6">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
             <!-- Left Panel - Input -->
             <div class="lg:col-span-5 space-y-6">
 
                 <!-- Input Card -->
-                <div class="bg-white rounded-2xl shadow-card p-6">
+                <div class="glass-card rounded-3xl p-6">
                     <div class="mb-5">
-                        <label class="block text-sm font-medium text-douyin-gray-700 mb-2">分享链接</label>
+                        <label class="flex items-center gap-2 text-sm font-bold text-slate-700 mb-3">
+                            <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                            </svg>
+                            分享链接
+                        </label>
                         <div class="relative">
                             <textarea
                                 x-model="url"
                                 @keydown.meta.enter="extractText"
                                 @keydown.ctrl.enter="extractText"
                                 placeholder="粘贴分享链接或文本，例如：&#10;7.89 02/February/2025 xxx https://v.douyin.com/xxxxx/"
-                                rows="4"
-                                class="w-full px-4 py-3 text-sm border border-douyin-gray-200 rounded-xl resize-none focus-ring transition-smooth placeholder:text-douyin-gray-400"
+                                rows="5"
+                                class="w-full px-5 py-4 text-sm border-2 border-slate-200 rounded-2xl resize-none input-focus-effect bg-white/50 placeholder:text-slate-400"
                                 :disabled="loading"
                             ></textarea>
                             <button
                                 x-show="url"
                                 @click="url = ''; resetState()"
-                                class="absolute top-3 right-3 w-6 h-6 rounded-full bg-douyin-gray-100 hover:bg-douyin-gray-200 flex items-center justify-center transition-smooth">
-                                <svg class="w-3.5 h-3.5 text-douyin-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center transition-all duration-200 hover:scale-110">
+                                <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
                             </button>
                         </div>
-                        <p class="mt-2 text-xs text-douyin-gray-400">提示：按 <kbd class="px-1.5 py-0.5 bg-douyin-gray-100 rounded text-douyin-gray-600">⌘</kbd> + <kbd class="px-1.5 py-0.5 bg-douyin-gray-100 rounded text-douyin-gray-600">Enter</kbd> 快速提取</p>
+                        <p class="mt-3 text-xs text-slate-500 flex items-center gap-2">
+                            <kbd class="px-2 py-1 bg-slate-200 rounded-lg text-slate-700 font-mono text-xs">⌘</kbd>
+                            <span>+</span>
+                            <kbd class="px-2 py-1 bg-slate-200 rounded-lg text-slate-700 font-mono text-xs">Enter</kbd>
+                            <span>快速提取</span>
+                        </p>
                     </div>
 
                     <!-- Action Buttons -->
@@ -344,8 +554,8 @@
                         <button
                             @click="extractInfo"
                             :disabled="!url || loading"
-                            class="flex-1 h-11 bg-douyin-gray-100 hover:bg-douyin-gray-200 text-douyin-gray-700 font-medium text-sm rounded-xl transition-smooth disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="flex-1 h-12 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm rounded-2xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 hover:scale-105 disabled:hover:scale-100">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                             获取信息
@@ -353,8 +563,8 @@
                         <button
                             @click="extractText"
                             :disabled="!url || loading || !apiKeyConfigured"
-                            class="flex-1 h-11 bg-gradient-douyin hover:opacity-90 text-white font-medium text-sm rounded-xl transition-smooth disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-douyin-red/20">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="flex-1 h-12 btn-gradient text-white font-bold text-sm rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 disabled:hover:scale-100 disabled:shadow-none">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
                             提取文案
@@ -363,20 +573,19 @@
 
                     <!-- API Warning -->
                     <div x-show="!apiKeyConfigured" @click="showSettings = true"
-                         class="mt-4 p-3 bg-amber-50 border border-amber-100 rounded-xl cursor-pointer hover:bg-amber-100 transition-smooth">
+                         class="mt-4 p-4 bg-gradient-to-r from-amber-50 to-amber-100/50 border-2 border-amber-200 rounded-2xl cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02]">
                         <div class="flex items-center justify-between">
-                            <div class="flex items-start gap-2">
-                                <svg class="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                                </svg>
-                                <div class="text-xs text-amber-800">
-                                    <p class="font-medium">需要配置 API Key 才能提取文案</p>
-                                    <p class="mt-1 text-amber-600">点击此处配置 API Key</p>
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 bg-amber-200 rounded-xl flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <div class="text-sm">
+                                    <p class="font-bold text-amber-800">需要配置 API Key</p>
+                                    <p class="text-amber-600">点击此处配置 →</p>
                                 </div>
                             </div>
-                            <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
                         </div>
                     </div>
                 </div>
@@ -384,28 +593,29 @@
                 <!-- Video Info Card -->
                 <div x-show="videoInfo" x-transition:enter="transition ease-out duration-300"
                      x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
-                     class="bg-white rounded-2xl shadow-card overflow-hidden">
+                     class="glass-card glass-card-hover rounded-3xl overflow-hidden"
+                     style="display: none;">
 
                     <!-- Card Header -->
-                    <div class="px-6 py-4 border-b border-douyin-gray-100 flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 bg-gradient-douyin rounded-lg flex items-center justify-center">
-                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="px-6 py-5 border-b border-slate-100/50 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 bg-gradient-to-br from-brand-500 to-brand-600 rounded-2xl flex items-center justify-center shadow-lg shadow-brand-500/30">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                 </svg>
                             </div>
-                            <span class="font-semibold text-douyin-gray-900">视频信息</span>
+                            <span class="font-bold text-slate-800">视频信息</span>
                         </div>
-                        <span class="text-xs text-douyin-gray-400 font-mono" x-text="videoInfo?.video_id"></span>
+                        <span class="text-xs text-slate-400 font-mono px-3 py-1.5 bg-slate-100 rounded-xl" x-text="videoInfo?.video_id"></span>
                     </div>
 
                     <!-- Card Body -->
                     <div class="p-6">
-                        <div class="flex items-start gap-2 mb-4 group">
-                            <h3 class="font-medium text-douyin-gray-900 flex-1" x-text="videoInfo?.title"></h3>
+                        <div class="flex items-start gap-2 mb-5 group">
+                            <h3 class="font-bold text-slate-800 flex-1 text-base" x-text="videoInfo?.title"></h3>
                             <button @click="copyToClipboard(videoInfo?.title)"
-                                    class="opacity-0 group-hover:opacity-100 w-8 h-8 rounded-lg bg-douyin-gray-100 hover:bg-douyin-gray-200 flex items-center justify-center flex-shrink-0 transition-smooth">
-                                <svg class="w-4 h-4 text-douyin-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    class="opacity-0 group-hover:opacity-100 w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center flex-shrink-0 transition-all duration-200 hover:scale-110">
+                                <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                 </svg>
                             </button>
@@ -413,19 +623,19 @@
 
                         <!-- Info Items -->
                         <div class="space-y-3">
-                            <div class="flex items-center gap-3 p-3 bg-douyin-gray-50 rounded-xl group hover:bg-douyin-gray-100 transition-smooth">
-                                <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                                    <svg class="w-5 h-5 text-douyin-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="flex items-center gap-4 p-4 bg-gradient-to-r from-slate-50 to-slate-100/50 rounded-2xl group hover:from-slate-100 hover:to-slate-150 transition-all duration-200 cursor-pointer">
+                                <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                                    <svg class="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/>
                                     </svg>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-xs text-douyin-gray-400 mb-0.5">视频 ID</p>
-                                    <p class="text-sm font-mono text-douyin-gray-700 truncate" x-text="videoInfo?.video_id"></p>
+                                    <p class="text-xs text-slate-400 mb-0.5 font-medium">视频 ID</p>
+                                    <p class="text-sm font-mono text-slate-700 truncate font-semibold" x-text="videoInfo?.video_id"></p>
                                 </div>
                                 <button @click="copyToClipboard(videoInfo?.video_id)"
-                                        class="opacity-0 group-hover:opacity-100 w-8 h-8 rounded-lg bg-white hover:bg-douyin-gray-200 flex items-center justify-center transition-smooth">
-                                    <svg class="w-4 h-4 text-douyin-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        class="opacity-0 group-hover:opacity-100 w-10 h-10 rounded-xl bg-white hover:bg-slate-100 flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-sm">
+                                    <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                     </svg>
                                 </button>
@@ -433,17 +643,17 @@
 
                             <a x-show="videoInfo?.download_url"
                                :href="`/api/video/download?url=${encodeURIComponent(videoInfo?.download_url)}&filename=${encodeURIComponent(videoInfo?.video_id || 'video')}.mp4`"
-                               class="flex items-center gap-3 p-3 bg-green-50 rounded-xl group hover:bg-green-100 transition-smooth cursor-pointer">
-                                <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
-                                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               class="flex items-center gap-4 p-4 bg-gradient-to-r from-emerald-50 to-emerald-100/50 rounded-2xl group hover:from-emerald-100 hover:to-emerald-150 transition-all duration-200 cursor-pointer hover:scale-[1.02]">
+                                <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                                    <svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                                     </svg>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-xs text-green-600 mb-0.5">无水印视频</p>
-                                    <p class="text-sm font-medium text-green-700">点击下载原视频</p>
+                                    <p class="text-xs text-emerald-600 mb-0.5 font-medium">无水印视频</p>
+                                    <p class="text-sm font-bold text-emerald-700">点击下载原视频</p>
                                 </div>
-                                <svg class="w-5 h-5 text-green-500 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-6 h-6 text-emerald-500 group-hover:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                                 </svg>
                             </a>
@@ -452,50 +662,53 @@
                 </div>
 
                 <!-- Loading State -->
-                <div x-show="loading" x-transition class="bg-white rounded-2xl shadow-card p-6">
-                    <div class="flex items-center gap-4 mb-6">
-                        <div class="relative w-12 h-12">
-                            <div class="absolute inset-0 rounded-full border-4 border-douyin-gray-100"></div>
-                            <div class="absolute inset-0 rounded-full border-4 border-douyin-red border-t-transparent animate-spin-slow"></div>
+                <div x-show="loading" x-transition class="glass-card rounded-3xl p-6"
+                     style="display: none;">
+                    <div class="flex items-center gap-5 mb-6">
+                        <div class="relative w-16 h-16">
+                            <div class="absolute inset-0 rounded-full border-4 border-slate-100"></div>
+                            <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-brand-500 animate-spin"></div>
                         </div>
                         <div>
-                            <p class="font-medium text-douyin-gray-900" x-text="loadingText"></p>
-                            <p class="text-sm text-douyin-gray-400">请稍候...</p>
+                            <p class="font-bold text-slate-800 text-lg" x-text="loadingText"></p>
+                            <p class="text-sm text-slate-500">请稍候...</p>
                         </div>
                     </div>
 
                     <!-- Progress Steps -->
-                    <div x-show="extractingText" class="space-y-2">
+                    <div x-show="extractingText" class="space-y-3">
                         <template x-for="(stepItem, index) in steps" :key="index">
-                            <div class="flex items-center gap-3 p-2 rounded-lg transition-smooth"
-                                 :class="step > index + 1 ? 'bg-green-50' : step === index + 1 ? 'bg-douyin-red/5' : ''">
-                                <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium transition-smooth"
-                                     :class="step > index + 1 ? 'bg-green-500 text-white' : step === index + 1 ? 'bg-douyin-red text-white' : 'bg-douyin-gray-200 text-douyin-gray-500'">
-                                    <svg x-show="step > index + 1" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                            <div class="flex items-center gap-4 p-4 rounded-2xl transition-all duration-300"
+                                 :class="step > index + 1 ? 'bg-emerald-50' : step === index + 1 ? 'bg-brand-50' : 'bg-slate-50'">
+                                <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold transition-all duration-300"
+                                     :class="step > index + 1 ? 'bg-emerald-500 text-white' : step === index + 1 ? 'bg-brand-500 text-white' : 'bg-slate-200 text-slate-500'">
+                                    <svg x-show="step > index + 1" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                                     </svg>
                                     <span x-show="step <= index + 1" x-text="index + 1"></span>
                                 </div>
-                                <span class="text-sm" :class="step >= index + 1 ? 'text-douyin-gray-900' : 'text-douyin-gray-400'" x-text="stepItem"></span>
+                                <span class="text-sm font-medium" :class="step >= index + 1 ? 'text-slate-800' : 'text-slate-400'" x-text="stepItem"></span>
+                                <div x-show="step === index + 1" class="ml-auto w-2 h-2 rounded-full bg-brand-500 animate-ping"></div>
                             </div>
                         </template>
                     </div>
                 </div>
 
                 <!-- Error State -->
-                <div x-show="error" x-transition class="bg-red-50 border border-red-100 rounded-2xl p-5">
-                    <div class="flex items-start gap-3">
-                        <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                            <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                <div x-show="error" x-transition class="bg-gradient-to-r from-red-50 to-red-100/50 border-2 border-red-200 rounded-3xl p-6"
+                     style="display: none;">
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
                             </svg>
                         </div>
                         <div class="flex-1">
-                            <h4 class="font-medium text-red-800">提取失败</h4>
+                            <h4 class="font-bold text-red-800 text-lg">提取失败</h4>
                             <p class="text-sm text-red-600 mt-1" x-text="error"></p>
                         </div>
-                        <button @click="error = ''" class="w-8 h-8 rounded-lg hover:bg-red-100 flex items-center justify-center">
-                            <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button @click="error = ''" class="w-10 h-10 rounded-xl hover:bg-red-100 flex items-center justify-center transition-all duration-200 hover:scale-110">
+                            <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
                         </button>
@@ -507,56 +720,72 @@
             <div class="lg:col-span-7">
 
                 <!-- Empty State -->
-                <div x-show="!transcript && !loading" class="bg-white rounded-2xl shadow-card h-full min-h-[500px] flex flex-col items-center justify-center p-8 text-center">
-                    <div class="w-24 h-24 bg-douyin-gray-100 rounded-3xl flex items-center justify-center mb-6">
-                        <svg class="w-12 h-12 text-douyin-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div x-show="!transcript && !loading" class="glass-card rounded-3xl h-full min-h-[500px] flex flex-col items-center justify-center p-8 text-center">
+                    <div class="w-28 h-28 bg-gradient-to-br from-brand-100 to-brand-200/50 rounded-[2rem] flex items-center justify-center mb-8 shadow-lg shadow-brand-200/50">
+                        <svg class="w-14 h-14 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-semibold text-douyin-gray-900 mb-2">等待提取</h3>
-                    <p class="text-sm text-douyin-gray-500 max-w-xs">粘贴分享链接，点击「提取文案」按钮，AI 将自动识别视频中的语音内容</p>
+                    <h3 class="text-xl font-bold text-slate-800 mb-3">等待提取</h3>
+                    <p class="text-sm text-slate-500 max-w-sm leading-relaxed">粘贴分享链接，点击「提取文案」按钮，AI 将自动识别视频中的语音内容</p>
 
                     <!-- Feature Pills -->
-                    <div class="flex flex-wrap justify-center gap-2 mt-6">
-                        <span class="px-3 py-1.5 bg-douyin-gray-100 rounded-full text-xs text-douyin-gray-600">无水印下载</span>
-                        <span class="px-3 py-1.5 bg-douyin-gray-100 rounded-full text-xs text-douyin-gray-600">AI 语音识别</span>
-                        <span class="px-3 py-1.5 bg-douyin-gray-100 rounded-full text-xs text-douyin-gray-600">一键复制</span>
+                    <div class="flex flex-wrap justify-center gap-3 mt-8">
+                        <span class="px-4 py-2.5 bg-gradient-to-r from-brand-50 to-brand-100/50 rounded-2xl text-sm text-brand-700 font-semibold border border-brand-100 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            无水印下载
+                        </span>
+                        <span class="px-4 py-2.5 bg-gradient-to-r from-accent-50 to-accent-100/50 rounded-2xl text-sm text-accent-700 font-semibold border border-accent-100 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                            </svg>
+                            AI 语音识别
+                        </span>
+                        <span class="px-4 py-2.5 bg-gradient-to-r from-violet-50 to-violet-100/50 rounded-2xl text-sm text-violet-700 font-semibold border border-violet-100 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                            一键复制
+                        </span>
                     </div>
                 </div>
 
                 <!-- Transcript Card -->
                 <div x-show="transcript" x-transition:enter="transition ease-out duration-300"
                      x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0"
-                     class="bg-white rounded-2xl shadow-card overflow-hidden h-full flex flex-col">
+                     class="glass-card rounded-3xl overflow-hidden h-full flex flex-col"
+                     style="display: none;">
 
                     <!-- Card Header -->
-                    <div class="px-6 py-4 border-b border-douyin-gray-100 flex items-center justify-between flex-shrink-0">
-                        <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 bg-gradient-douyin rounded-lg flex items-center justify-center">
-                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="px-6 py-5 border-b border-slate-100/50 flex items-center justify-between flex-shrink-0">
+                        <div class="flex items-center gap-3">
+                            <div class="w-11 h-11 bg-gradient-to-br from-brand-500 to-brand-600 rounded-2xl flex items-center justify-center shadow-lg shadow-brand-500/30">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                 </svg>
                             </div>
-                            <span class="font-semibold text-douyin-gray-900">提取结果</span>
+                            <span class="font-bold text-slate-800">提取结果</span>
                         </div>
 
                         <div class="flex items-center gap-2">
-                            <span class="text-xs text-douyin-gray-400 mr-2" x-text="`${transcript?.length || 0} 字`"></span>
+                            <span class="text-xs text-slate-400 mr-2 font-mono px-3 py-1.5 bg-slate-100 rounded-xl" x-text="`${transcript?.length || 0} 字`"></span>
 
                             <button @click="copyTranscript"
-                                    class="h-9 px-4 bg-douyin-gray-100 hover:bg-douyin-gray-200 rounded-lg text-sm font-medium text-douyin-gray-700 transition-smooth flex items-center gap-2">
-                                <svg x-show="!copied" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    class="h-11 px-5 bg-slate-100 hover:bg-slate-200 rounded-2xl text-sm font-bold text-slate-700 transition-all duration-200 flex items-center gap-2 hover:scale-105">
+                                <svg x-show="!copied" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                 </svg>
-                                <svg x-show="copied" class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                <svg x-show="copied" class="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                                 </svg>
                                 <span x-text="copied ? '已复制' : '复制'"></span>
                             </button>
 
                             <button @click="downloadTranscript"
-                                    class="h-9 px-4 bg-gradient-douyin hover:opacity-90 rounded-lg text-sm font-medium text-white transition-smooth flex items-center gap-2 shadow-lg shadow-douyin-red/20">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    class="h-11 px-5 btn-gradient rounded-2xl text-sm font-bold text-white transition-all duration-200 flex items-center gap-2 hover:scale-105">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                                 </svg>
                                 下载
@@ -565,21 +794,21 @@
                     </div>
 
                     <!-- Transcript Content -->
-                    <div class="flex-1 overflow-y-auto p-6">
+                    <div class="flex-1 overflow-y-auto p-6 custom-scrollbar">
                         <div class="prose prose-sm max-w-none">
-                            <p class="text-douyin-gray-700 leading-relaxed whitespace-pre-wrap" x-text="transcript"></p>
+                            <p class="text-slate-700 leading-relaxed whitespace-pre-wrap text-base" x-text="transcript"></p>
                         </div>
                     </div>
 
                     <!-- Card Footer -->
-                    <div class="px-6 py-3 bg-douyin-gray-50 border-t border-douyin-gray-100 flex items-center justify-between flex-shrink-0">
-                        <div class="flex items-center gap-2 text-xs text-douyin-gray-400">
+                    <div class="px-6 py-4 bg-gradient-to-r from-slate-50 to-slate-100/50 border-t border-slate-100/50 flex items-center justify-between flex-shrink-0">
+                        <div class="flex items-center gap-2 text-xs text-slate-500">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
-                            <span>Powered by SiliconFlow SenseVoice</span>
+                            <span class="font-medium">Powered by SiliconFlow SenseVoice</span>
                         </div>
-                        <div class="flex items-center gap-1 text-xs text-douyin-gray-400">
+                        <div class="flex items-center gap-1 text-xs text-slate-400">
                             <span x-text="videoInfo?.title" class="max-w-xs truncate"></span>
                         </div>
                     </div>
@@ -593,26 +822,34 @@
          x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
          x-transition:leave="transition ease-in duration-150"
          x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-4"
-         class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
-        <div class="px-4 py-3 bg-douyin-gray-900 text-white text-sm rounded-xl shadow-2xl flex items-center gap-2">
-            <svg class="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-            </svg>
-            <span x-text="toast"></span>
+         class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50"
+         style="display: none;">
+        <div class="px-6 py-4 bg-slate-800 text-white text-sm rounded-2xl shadow-2xl flex items-center gap-3">
+            <div class="w-8 h-8 bg-emerald-500 rounded-xl flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+            </div>
+            <span class="font-medium" x-text="toast"></span>
         </div>
     </div>
 
     <!-- Footer -->
     <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-douyin-gray-400">
-            <p>Made with <span class="text-douyin-red">♥</span> by <a href="https://github.com/yzfly" target="_blank" class="hover:text-douyin-red transition-colors">yzfly</a></p>
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500">
+            <p class="flex items-center gap-2">
+                Made with
+                <span class="text-brand-500 animate-pulse">♥</span>
+                by
+                <a href="https://github.com/yzfly" target="_blank" class="font-semibold hover:text-brand-500 transition-colors">yzfly</a>
+            </p>
             <div class="flex items-center gap-4">
-                <a href="https://github.com/yzfly/douyin-mcp-server" target="_blank" class="hover:text-douyin-red transition-colors flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                <a href="https://github.com/yzfly/douyin-mcp-server" target="_blank" class="hover:text-brand-500 transition-colors flex items-center gap-2 font-medium">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
                     GitHub
                 </a>
                 <span>·</span>
-                <span>v1.4.0</span>
+                <span class="font-mono px-2 py-1 bg-slate-100 rounded-lg">v1.4.0</span>
             </div>
         </div>
     </footer>
@@ -687,7 +924,7 @@
 
                 showToast(message) {
                     this.toast = message;
-                    setTimeout(() => this.toast = '', 2000);
+                    setTimeout(() => this.toast = '', 2500);
                 },
 
                 async copyToClipboard(text) {
