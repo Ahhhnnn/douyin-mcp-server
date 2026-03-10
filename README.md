@@ -54,23 +54,34 @@ uv run python web/app.py
 
 ### 配置 API Key
 
-有两种方式配置 API Key：
+WebUI 需要配置 API Key 才能使用文案提取功能：
 
-**方式一：浏览器内配置（推荐）**
-
-1. 打开 WebUI 页面
-2. 点击顶部的「API 未配置」按钮
-3. 在弹窗中输入 API Key 并保存
-4. API Key 保存在浏览器本地，刷新页面后仍有效
-
-**方式二：环境变量**
+**步骤 1: 创建配置文件**
 
 ```bash
-export API_KEY="sk-xxxxxxxxxxxxxxxx"
+# 复制配置文件模板
+cp .env.example .env
+
+# 编辑 .env 文件，填入你的 API Key
+# API_KEY=sk-your-api-key-here
+```
+
+**步骤 2: 启动服务**
+
+```bash
+# 安装依赖（首次运行）
+uv sync
+
+# 启动服务（会自动读取 .env 文件）
 uv run python web/app.py
 ```
 
 > 💡 获取免费 API Key：[硅基流动](https://cloud.siliconflow.cn/i/TxUlXG3u)（新用户有免费额度）
+
+> ⚠️ **安全提示**：
+> - `.env` 文件已被 `.gitignore` 排除，不会被提交到 git 仓库
+> - API Key 仅在后端服务器存储，前端无法访问
+> - 请妥善保管你的 API Key，不要泄露给他人
 
 ### 功能说明
 
@@ -83,10 +94,11 @@ uv run python web/app.py
 
 ### 使用步骤
 
-1. **粘贴链接** - 将分享链接粘贴到输入框
-2. **点击按钮** - 选择「获取信息」或「提取文案」
-3. **查看结果** - 右侧显示视频信息和提取的文案
-4. **导出** - 复制文案或下载 Markdown 文件
+1. **配置 API Key** - 在项目根目录创建 `.env` 文件并设置 `API_KEY`
+2. **启动服务** - 运行 `uv run python web/app.py`
+3. **检查状态** - 确认顶部状态栏显示「API 已配置」（绿色）
+4. **粘贴链接** - 将分享链接粘贴到输入框
+5. **提取文案** - 点击「提取文案」按钮
 
 ---
 
@@ -227,7 +239,14 @@ output/
 
 ## 📝 更新日志
 
-### v1.4.0 (最新)
+### v1.5.0 (最新)
+
+- 🔒 **安全增强** - API Key 通过 .env 配置文件管理，不再从前端传递
+- 🔧 **配置简化** - 新增 .env.example 配置模板
+- 🌐 **WebUI** - 浏览器可视化界面
+- 📑 **大文件支持** - 自动分段处理长音频
+
+### v1.4.0
 
 - 🌐 **WebUI** - 新增浏览器可视化界面
 - 🔑 **浏览器配置 API Key** - 无需环境变量

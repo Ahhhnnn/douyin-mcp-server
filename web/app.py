@@ -23,6 +23,10 @@ from pydantic import BaseModel
 import uvicorn
 import requests
 
+# 从 .env 文件加载配置
+from dotenv import load_dotenv
+load_dotenv()  # 自动查找 .env 文件并加载
+
 # 导入抖音处理模块
 from douyin_downloader import get_video_info, extract_text, HEADERS
 
@@ -33,7 +37,6 @@ templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 class VideoRequest(BaseModel):
     """视频请求模型"""
     url: str
-    api_key: str = ""  # 可选，从前端传入
 
 
 class VideoInfoResponse(BaseModel):
@@ -63,11 +66,12 @@ async def index(request: Request):
 
 @app.get("/api/health")
 async def health_check():
-    """健康检查"""
+    """健康检查 - 检查后端 API Key 配置状态"""
     api_key = os.getenv("API_KEY", "")
     return {
         "status": "ok",
-        "api_key_configured": bool(api_key)
+        "api_key_configured": bool(api_key),
+        "message": "API Key 未配置，请在 .env 文件中设置 API_KEY" if not api_key else "API Key 已配置"
     }
 
 
@@ -88,13 +92,13 @@ async def get_info(req: VideoRequest):
 
 @app.post("/api/video/extract", response_model=ExtractResponse)
 async def extract_transcript(req: VideoRequest):
-    """提取视频文案（需要 API_KEY）"""
-    # 优先使用请求中的 API Key，其次使用环境变量
-    api_key = req.api_key or os.getenv("API_KEY", "")
+    """提取视频文案（需要 .env 文件中配置 API_KEY）"""
+    # 从 .env 文件或环境变量获取 API Key
+    api_key = os.getenv("API_KEY", "")
     if not api_key:
         return ExtractResponse(
             success=False,
-            error="请先配置 API Key"
+            error="后端未配置 API Key，请在项目根目录的 .env 文件中设置 API_KEY"
         )
 
     try:
@@ -159,7 +163,12 @@ def main():
     """启动服务"""
     port = int(os.getenv("PORT", "8080"))
     print(f"🚀 启动文案提取器 WebUI: http://localhost:{port}")
-    print(f"📝 API_KEY 配置状态: {'已配置' if os.getenv('API_KEY') else '未配置'}")
+    api_key = os.getenv("API_KEY")
+    if api_key:
+        print(f"✅ API_KEY 已配置（从 .env 文件读取）")
+    else:
+        print(f"⚠️  API_KEY 未配置，请在 .env 文件中设置 API_KEY")
+        print(f"   文案提取功能将不可用")
     uvicorn.run(app, host="0.0.0.0", port=port)
 
 

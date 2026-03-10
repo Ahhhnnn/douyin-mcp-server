@@ -372,7 +372,7 @@ wheels = [
 
 [[package]]
 name = "douyin-mcp-server"
-version = "1.4.0"
+version = "1.5.0"
 source = { editable = "." }
 dependencies = [
     { name = "dashscope" },
@@ -380,6 +380,7 @@ dependencies = [
     { name = "ffmpeg-python" },
     { name = "jinja2" },
     { name = "mcp" },
+    { name = "python-dotenv" },
     { name = "requests" },
     { name = "tqdm" },
     { name = "uvicorn" },
@@ -392,6 +393,7 @@ requires-dist = [
     { name = "ffmpeg-python" },
     { name = "jinja2" },
     { name = "mcp", specifier = ">=1.0.0" },
+    { name = "python-dotenv" },
     { name = "requests" },
     { name = "tqdm" },
     { name = "uvicorn" },
