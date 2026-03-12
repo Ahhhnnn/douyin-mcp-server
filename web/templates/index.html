@@ -868,13 +868,41 @@
                 },
 
                 async copyTranscript() {
+                    // Method 1: Try modern Clipboard API first
+                    if (navigator.clipboard && window.isSecureContext) {
+                        try {
+                            await navigator.clipboard.writeText(this.transcript);
+                            this.copied = true;
+                            this.showToast('文案已复制到剪贴板');
+                            setTimeout(() => this.copied = false, 2000);
+                            return;
+                        } catch (e) {
+                            console.warn('Clipboard API failed, trying fallback:', e);
+                        }
+                    }
+
+                    // Method 2: Fallback to execCommand
                     try {
-                        await navigator.clipboard.writeText(this.transcript);
-                        this.copied = true;
-                        this.showToast('文案已复制到剪贴板');
-                        setTimeout(() => this.copied = false, 2000);
+                        const textarea = document.createElement('textarea');
+                        textarea.value = this.transcript;
+                        textarea.style.position = 'fixed';
+                        textarea.style.opacity = '0';
+                        document.body.appendChild(textarea);
+                        textarea.select();
+
+                        const successful = document.execCommand('copy');
+                        document.body.removeChild(textarea);
+
+                        if (successful) {
+                            this.copied = true;
+                            this.showToast('文案已复制到剪贴板');
+                            setTimeout(() => this.copied = false, 2000);
+                        } else {
+                            throw new Error('execCommand failed');
+                        }
                     } catch (e) {
-                        this.error = '复制失败，请手动选择文本复制';
+                        console.error('Copy failed:', e);
+                        this.showToast('复制失败，请手动选择文本复制');
                     }
                 },
 
