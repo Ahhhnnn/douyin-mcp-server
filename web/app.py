@@ -11,7 +11,15 @@
 
 import os
 import sys
+import logging
 from pathlib import Path
+
+# 配置日志
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 # 添加项目路径
 sys.path.insert(0, str(Path(__file__).parent.parent / "douyin-video" / "scripts"))
@@ -32,6 +40,9 @@ from douyin_downloader import get_video_info, extract_text, HEADERS
 
 app = FastAPI(title="抖音文案提取器", version="1.0.0")
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
+
+# 获取日志记录器
+logger = logging.getLogger(__name__)
 
 
 class VideoRequest(BaseModel):
@@ -67,11 +78,23 @@ async def index(request: Request):
 @app.get("/api/health")
 async def health_check():
     """健康检查 - 检查后端 API Key 配置状态"""
-    api_key = os.getenv("API_KEY", "")
+    # 支持多种 API Key 配置方式
+    api_key = (
+        os.getenv("DASHSCOPE_API_KEY") or
+        os.getenv("SILICONFLOW_API_KEY") or
+        os.getenv("API_KEY") or
+        ""
+    )
+    provider = (
+        "dashscope" if os.getenv("DASHSCOPE_API_KEY") else
+        "siliconflow" if os.getenv("SILICONFLOW_API_KEY") else
+        "auto"
+    )
     return {
         "status": "ok",
         "api_key_configured": bool(api_key),
-        "message": "API Key 未配置，请在 .env 文件中设置 API_KEY" if not api_key else "API Key 已配置"
+        "provider": provider,
+        "message": "API Key 未配置，请在 .env 文件中设置 DASHSCOPE_API_KEY 或 SILICONFLOW_API_KEY" if not api_key else f"API Key 已配置 ({provider})"
     }
 
 
@@ -92,17 +115,34 @@ async def get_info(req: VideoRequest):
 
 @app.post("/api/video/extract", response_model=ExtractResponse)
 async def extract_transcript(req: VideoRequest):
-    """提取视频文案（需要 .env 文件中配置 API_KEY）"""
-    # 从 .env 文件或环境变量获取 API Key
-    api_key = os.getenv("API_KEY", "")
+    """提取视频文案（需要 .env 文件中配置 API Key）"""
+    # 从 .env 文件或环境变量获取 API Key（支持多种配置方式）
+    dashscope_key = os.getenv("DASHSCOPE_API_KEY", "")
+    siliconflow_key = os.getenv("SILICONFLOW_API_KEY", "")
+    api_key = dashscope_key or siliconflow_key or os.getenv("API_KEY", "")
+
     if not api_key:
+        logger.warning("提取请求失败: 未配置 API Key")
         return ExtractResponse(
             success=False,
-            error="后端未配置 API Key，请在项目根目录的 .env 文件中设置 API_KEY"
+            error="后端未配置 API Key，请在项目根目录的 .env 文件中设置 DASHSCOPE_API_KEY 或 SILICONFLOW_API_KEY"
         )
 
+    # 确定使用的 provider
+    provider = os.getenv("TRANSCRIPTION_PROVIDER", "auto")
+    if dashscope_key and (provider == "auto" or provider == "dashscope"):
+        provider = "dashscope"
+    elif siliconflow_key and (provider == "auto" or provider == "siliconflow"):
+        provider = "siliconflow"
+
+    logger.info(f"[WebUI] 收到提取请求 - Provider: {provider}")
+
     try:
-        result = extract_text(req.url, api_key=api_key, show_progress=False)
+        result = extract_text(req.url, api_key=api_key, provider=provider, show_progress=False)
+        text_length = len(result["text"])
+
+        logger.info(f"[WebUI] 提取成功 - Video ID: {result['video_info']['video_id']}, 文案长度: {text_length} 字符")
+
         return ExtractResponse(
             success=True,
             video_id=result["video_info"]["video_id"],
@@ -111,6 +151,7 @@ async def extract_transcript(req: VideoRequest):
             download_url=result["video_info"]["url"]
         )
     except Exception as e:
+        logger.error(f"[WebUI] 提取失败: {str(e)}")
         return ExtractResponse(success=False, error=str(e))
 
 
@@ -162,13 +203,25 @@ async def download_video(url: str, filename: str = "video.mp4"):
 def main():
     """启动服务"""
     port = int(os.getenv("PORT", "8080"))
+
+    # 检查 API Key 配置
+    dashscope_key = os.getenv("DASHSCOPE_API_KEY", "")
+    siliconflow_key = os.getenv("SILICONFLOW_API_KEY", "")
+    api_key = dashscope_key or siliconflow_key or os.getenv("API_KEY", "")
+
     print(f"🚀 启动文案提取器 WebUI: http://localhost:{port}")
-    api_key = os.getenv("API_KEY")
+
     if api_key:
-        print(f"✅ API_KEY 已配置（从 .env 文件读取）")
+        provider = (
+            "阿里云百炼 (Dashscope)" if dashscope_key else
+            "硅基流动 (SiliconFlow)" if siliconflow_key else
+            "API"
+        )
+        print(f"✅ API_KEY 已配置 ({provider})")
     else:
-        print(f"⚠️  API_KEY 未配置，请在 .env 文件中设置 API_KEY")
+        print(f"⚠️  API_KEY 未配置，请在 .env 文件中设置 DASHSCOPE_API_KEY 或 SILICONFLOW_API_KEY")
         print(f"   文案提取功能将不可用")
+
     uvicorn.run(app, host="0.0.0.0", port=port)
 
 

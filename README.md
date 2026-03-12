@@ -15,7 +15,7 @@
 ## ✨ 功能特性
 
 - 🎬 **无水印视频** - 获取高质量无水印视频下载链接
-- 🎙️ **AI 语音识别** - 使用硅基流动 SenseVoice 自动提取文案
+- 🎙️ **AI 语音识别** - 支持阿里云百炼（URL 直传）和硅基流动 SenseVoice
 - 📑 **大文件支持** - 自动分段处理超过 1 小时或 50MB 的音频
 - 🌐 **WebUI** - 现代化浏览器界面，无需命令行
 - 🔌 **MCP 集成** - 支持 Claude Desktop 等 AI 应用
@@ -62,9 +62,15 @@ WebUI 需要配置 API Key 才能使用文案提取功能：
 # 复制配置文件模板
 cp .env.example .env
 
-# 编辑 .env 文件，填入你的 API Key
-# API_KEY=sk-your-api-key-here
+# 编辑 .env 文件，选择一个 API 提供商并填入对应的 API Key
 ```
+
+**API 提供商选择：**
+
+| 提供商 | 特点 | 获取地址 |
+|--------|------|----------|
+| **阿里云百炼** (推荐) | 视频URL直传，无需下载 | [dashscope.console.aliyun.com](https://dashscope.console.aliyun.com/apiKey) |
+| **硅基流动** | 需要下载视频和提取音频 | [cloud.siliconflow.cn](https://cloud.siliconflow.cn/i/TxUlXG3u) |
 
 **步骤 2: 启动服务**
 
@@ -76,7 +82,7 @@ uv sync
 uv run python web/app.py
 ```
 
-> 💡 获取免费 API Key：[硅基流动](https://cloud.siliconflow.cn/i/TxUlXG3u)（新用户有免费额度）
+> 💡 **推荐使用阿里云百炼** - 支持视频 URL 直传，处理速度更快
 
 > ⚠️ **安全提示**：
 > - `.env` 文件已被 `.gitignore` 排除，不会被提交到 git 仓库
@@ -108,8 +114,9 @@ uv run python web/app.py
 
 ### 配置方法
 
-编辑 MCP 配置文件，添加：
+编辑 MCP 配置文件，添加（选择一个 API 提供商配置）：
 
+**使用阿里云百炼（推荐）：**
 ```json
 {
   "mcpServers": {
@@ -117,7 +124,22 @@ uv run python web/app.py
       "command": "uvx",
       "args": ["douyin-mcp-server"],
       "env": {
-        "API_KEY": "sk-xxxxxxxxxxxxxxxx"
+        "API_KEY": "sk-your-dashscope-key-here"
+      }
+    }
+  }
+}
+```
+
+**使用硅基流动：**
+```json
+{
+  "mcpServers": {
+    "douyin-mcp": {
+      "command": "uvx",
+      "args": ["douyin-mcp-server"],
+      "env": {
+        "API_KEY": "sk-your-siliconflow-key-here"
       }
     }
   }
@@ -169,12 +191,31 @@ uv run python douyin-video/scripts/douyin_downloader.py -l "分享链接" -a inf
 # 下载无水印视频
 uv run python douyin-video/scripts/douyin_downloader.py -l "分享链接" -a download -o ./videos
 
-# 提取文案（需要 API_KEY）
+# 提取文案（自动选择 API）
 export API_KEY="sk-xxx"
 uv run python douyin-video/scripts/douyin_downloader.py -l "分享链接" -a extract -o ./output
 
+# 使用阿里云百炼 API（推荐，URL 直传）
+uv run python douyin-video/scripts/douyin_downloader.py -l "分享链接" -a extract --provider dashscope
+
+# 使用硅基流动 API
+uv run python douyin-video/scripts/douyin_downloader.py -l "分享链接" -a extract --provider siliconflow
+
 # 提取文案并保存视频
 uv run python douyin-video/scripts/douyin_downloader.py -l "分享链接" -a extract -o ./output --save-video
+```
+
+### 环境变量配置
+
+```bash
+# 方式 1: 使用阿里云百炼（推荐）
+export DASHSCOPE_API_KEY="sk-your-dashscope-key"
+
+# 方式 2: 使用硅基流动
+export SILICONFLOW_API_KEY="sk-your-siliconflow-key"
+
+# 方式 3: 通用 API Key（自动检测）
+export API_KEY="sk-your-api-key"
 ```
 
 ### 输出格式
@@ -229,11 +270,19 @@ output/
 
 ### API 说明
 
-语音识别使用 [硅基流动 SenseVoice API](https://cloud.siliconflow.cn/)：
+项目支持两种语音识别 API：
 
-- 模型：`FunAudioLLM/SenseVoiceSmall`
-- 限制：单次最大 1 小时 / 50MB（已自动处理）
-- 费用：新用户有免费额度
+#### 阿里云百炼（推荐）
+- **模型**：`paraformer-v2`
+- **特点**：支持视频 URL 直传，无需下载和提取音频
+- **限制**：无文件大小限制
+- **获取地址**：[dashscope.console.aliyun.com](https://dashscope.console.aliyun.com/apiKey)
+
+#### 硅基流动
+- **模型**：`FunAudioLLM/SenseVoiceSmall`
+- **特点**：需要下载视频并提取音频
+- **限制**：单次最大 1 小时 / 50MB（已自动处理分段）
+- **获取地址**：[cloud.siliconflow.cn](https://cloud.siliconflow.cn/i/TxUlXG3u)
 
 ---
 
