@@ -169,7 +169,9 @@ class DouyinProcessor:
                 # 获取转录结果
                 for transcription in transcription_response.output['results']:
                     url = transcription['transcription_url']
-                    result = json.loads(request.urlopen(url).read().decode('utf8'))
+                    response = requests.get(url, timeout=60)
+                    response.raise_for_status()
+                    result = response.json()
                     
                     # 保存结果到临时文件
                     temp_json_path = self.temp_dir / 'transcription.json'

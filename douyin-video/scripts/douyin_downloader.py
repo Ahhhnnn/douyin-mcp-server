@@ -156,7 +156,9 @@ class DashscopeStrategy(TranscriptionStrategy):
 
                 for transcription in transcription_response.output['results']:
                     url = transcription['transcription_url']
-                    result = json.loads(request.urlopen(url).read().decode('utf8'))
+                    response = requests.get(url, timeout=60)
+                    response.raise_for_status()
+                    result = response.json()
 
                     fetch_time = time.time() - fetch_start
 
